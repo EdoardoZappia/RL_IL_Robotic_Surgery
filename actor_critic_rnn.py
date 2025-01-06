@@ -46,12 +46,13 @@ class ActorCriticRNN(nn.Module):
         return action, value
 
 # Funzione di reward
-def compute_reward(predicted_state, real_state):
+def compute_reward(predicted_next_state, real_next_state, state, beta=0.1):
     # Reward = -distanza euclidea tra stato predetto e stato reale
-    return -torch.norm(predicted_state - real_state, dim=1)
+    #return -torch.norm(predicted_state - real_state, dim=1)
+    return -torch.norm(predicted_next_state - real_next_state, dim=1) + beta * torch.norm(predicted_next_state - state, dim=1)
 
 # Funzione di aggiornamento
-def update(actor_critic_rnn, optimizer, state, real_next_state, gamma=0.99):
+def update(actor_critic_rnn, optimizer, state, real_next_state, previous_action=None, gamma=0.99, penalty_weight=0.1):
 
     # Predizione del Critic e Actor
     action, state_value = actor_critic_rnn(state)
@@ -60,7 +61,7 @@ def update(actor_critic_rnn, optimizer, state, real_next_state, gamma=0.99):
     predicted_next_state = state + action
     
     # Calcola il reward
-    reward = compute_reward(predicted_next_state, real_next_state)
+    reward = compute_reward(predicted_next_state, real_next_state, state)
     
     # Calcola il valore del prossimo stato
     with torch.no_grad():
@@ -74,10 +75,13 @@ def update(actor_critic_rnn, optimizer, state, real_next_state, gamma=0.99):
     
     # Loss Actor: Policy gradient
     advantage = (target_value - state_value.detach())
-    #baseline = torch.mean(reward).detach()  # Calcola un baseline sul batch
-    #advantage = reward - baseline
-    actor_loss = -torch.mean(advantage * torch.norm(action, dim=1))
-    
+    actor_loss = -torch.mean(advantage * torch.norm(action, dim=1))  # Inizializzazione
+
+    # Penalizza azioni statiche (se previous_action è disponibile)
+    if previous_action is not None:
+        action_change_penalty = torch.mean(torch.norm(action - previous_action, dim=1))
+        actor_loss += penalty_weight * action_change_penalty  # Aggiungi la penalità
+
     loss = actor_loss + critic_loss
 
     # Aggiorna i pesi solo se l'optimizer è fornito
