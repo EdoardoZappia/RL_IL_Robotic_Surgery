@@ -1,0 +1,65 @@
+<mujoco model="anchored_figures">
+    <option timestep="0.01" gravity="0 0 0"/>
+
+    <!-- Materiali -->
+    <asset>
+        <material name="green_material" rgba="0.0 1.0 0.0 1.0"/>
+        <material name="white_material" rgba="1.0 1.0 1.0 1.0"/>
+        <material name="red_material" rgba="1.0 0.0 0.0 1.0"/> <!-- Materiale rosso -->
+    </asset>
+
+    <!-- Corpo del mondo -->
+    <worldbody>
+        <!-- Piano bianco sul piano XY -->
+        <geom type="plane" size="3 3 0.01" pos="0.0 0.0 -0.01" material="white_material" friction="0 0 0"/>
+
+        <!-- Corpo principale (centro di massa) -->
+        <body name="composite_body" pos="0 0 0" mocap="false">
+            <inertial pos="0 0 0" mass="0.000001" diaginertia="0.000001 0.000001 0.000001"/>
+
+            <!-- Joint per movimento sul piano XY -->
+            <joint name="slide_x" type="slide" axis="1 0 0" limited="false"/>
+            <joint name="slide_y" type="slide" axis="0 1 0" limited="false"/>
+            <joint name="rotation_z" type="hinge" axis="0 0 1" limited="false"/>
+
+            <!-- Rappresentazione del centro di massa -->
+            <geom type="sphere" size="0.015" pos="0 0 0" material="red_material" friction="0 0 0"/>
+
+            <!-- Prima figura (ellissoide grande) -->
+            <body name="large_ellipsoid" pos="0 0 0">
+                <geom type="ellipsoid" size="0.1 0.19 0.01" material="green_material" friction="0 0 0"/>
+            </body>
+
+            <!-- Seconda figura (ellissoide piccola) -->
+            <body name="small_ellipsoid1" pos="0.03 0.1 0">
+                <geom type="ellipsoid" size="0.11 0.11 0.01" material="green_material" euler="0 0 30" friction="0 0 0"/>
+            </body>
+
+            <!-- Terza figura (ellissoide piccola) -->
+            <body name="small_ellipsoid2" pos="0.03 -0.1 0">
+                <geom type="ellipsoid" size="0.11 0.11 0.01" material="green_material" euler="0 0 30" friction="0 0 0"/>
+            </body>
+
+        </body>
+
+        <camera name="top_view" pos="0 0 1" xyaxes="1 0 0 0 1 0"/>
+
+    </worldbody>
+
+    <!-- Attuatori -->
+    <actuator>
+        <!-- Attuatore per movimento lungo X -->
+        <motor name="act_slide_x" joint="slide_x" ctrllimited="false" gear="1e200"/>
+        <!-- Attuatore per movimento lungo Y -->
+        <motor name="act_slide_y" joint="slide_y" ctrllimited="false" gear="1e200"/>
+        <!-- Attuatore per rotazione attorno a Z -->
+        <motor name="act_rotation_z" joint="rotation_z" ctrllimited="false"/>
+    </actuator>
+
+    <!-- Configurazione visiva -->
+    <visual>
+        <global/>
+        <map stiffness="1e-3"/>
+        <quality shadowsize="2048"/>
+    </visual>
+</mujoco>

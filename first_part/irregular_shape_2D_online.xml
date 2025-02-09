@@ -1,0 +1,68 @@
+<mujoco model="anchored_figures">
+    <option timestep="0.01" gravity="0 0 0"/>
+
+    <!-- Materiali -->
+    <asset>
+        <material name="green_material" rgba="0.0 1.0 0.0 1.0"/>
+        <material name="white_material" rgba="1.0 1.0 1.0 1.0"/>
+        <material name="red_material" rgba="1.0 0.0 0.0 1.0"/> <!-- Materiale rosso -->
+    </asset>
+
+    <!-- Corpo del mondo -->
+    <worldbody>
+        <!-- Piano bianco sul piano XY -->
+        <geom type="plane" size="3 3 0.01" pos="0.0 0.0 -0.01" material="white_material" friction="0 0 0"/>
+
+        <!-- Corpo principale (centro di massa) -->
+        <body name="agent" pos="0 0 0" mocap="false">
+            <inertial pos="0 0 0" mass="1.0" diaginertia="0.01 0.01 0.01"/>
+
+            <!-- Joint per movimento sul piano XY -->
+            <joint name="agent_slide_x" type="slide" axis="1 0 0" limited="false"/>
+            <joint name="agent_slide_y" type="slide" axis="0 1 0" limited="false"/>
+            <joint name="agent_rotation_z" type="hinge" axis="0 0 1" limited="false"/>
+
+        </body>
+
+        <!-- Corpo principale (centro di massa) -->
+        <body name="target" pos="0 0 0" mocap="false">
+            <inertial pos="0 0 0" mass="1.0" diaginertia="0.01 0.01 0.01"/>
+
+            <!-- Joint per movimento sul piano XY -->
+            <joint name="target_slide_x" type="slide" axis="1 0 0" limited="false"/>
+            <joint name="target_slide_y" type="slide" axis="0 1 0" limited="false"/>
+            <joint name="rotation_target_z" type="hinge" axis="0 0 1" limited="false"/>
+
+            <!-- Rappresentazione del centro di massa -->
+            <geom type="sphere" size="0.015" pos="0 0 0" material="red_material" friction="0 0 0"/>
+
+        </body>
+
+        <camera name="top_view" pos="0 0 1" xyaxes="1 0 0 0 1 0"/>
+
+    </worldbody>
+
+    <!-- Attuatori -->
+    <actuator>
+        <!-- Attuatore per movimento lungo X -->
+        <motor name="act_slide_x" joint="agent_slide_x" ctrllimited="false" gear="1"/>
+        <!-- Attuatore per movimento lungo Y -->
+        <motor name="act_slide_y" joint="agent_slide_y" ctrllimited="false" gear="1"/>
+        <!-- Attuatore per rotazione attorno a Z -->
+        <motor name="act_rotation_z" joint="agent_rotation_z" ctrllimited="false"/>
+
+        <!-- Attuatore per movimento lungo X -->
+        <motor name="act_slide_target_x" joint="target_slide_x" ctrllimited="false" gear="1"/>
+        <!-- Attuatore per movimento lungo Y -->
+        <motor name="act_slide_target_y" joint="target_slide_y" ctrllimited="false" gear="1"/>
+        <!-- Attuatore per rotazione attorno a Z -->
+        <motor name="act_rotation_target_z" joint="rotation_target_z" ctrllimited="false"/>
+    </actuator>
+
+    <!-- Configurazione visiva -->
+    <visual>
+        <global/>
+        <map stiffness="1e-3"/>
+        <quality shadowsize="2048"/>
+    </visual>
+</mujoco>
